@@ -55,7 +55,6 @@ def r_cleaner(games_df, reviews_df):
 
     # Se eliminan las reviews de juegos que no esten disponibles en el dataset
     print('Se limpian las reviews de juegos inexistentes')
-    games_df = pd.read_feather('games_clean.feather')
 
     reviews_df = (
         reviews_df

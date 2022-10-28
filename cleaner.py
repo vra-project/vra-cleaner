@@ -23,7 +23,8 @@ config.read('secrets.toml', encoding='utf-8')
 BUCKET_S3 = config['AWS']['bucket_s3']
 ORIGINAL_NAME = 'dataset/games.feather'
 NEW_FILE_NAME = 'clean_dataset/games_clean.feather'
-FOLDER = 'reviews'
+FOLDER = 'reviews/'
+CLEAN_FOLDER = 'clean_reviews/'
 warnings.filterwarnings('ignore')
 
 # %%
@@ -55,6 +56,8 @@ for file in av_files:
     reviews_list.append(
         pd.read_feather(f'{BUCKET_S3}/{file}').drop('review_text', axis=1)
         )
+    print(file)
+
 reviews_df = pd.concat(reviews_list)
 print('Reviews cargadas')
 
@@ -64,7 +67,9 @@ first_clean_df = g_cleaner(games_df)
 clean_df, clean_reviews = r_cleaner(games_df, reviews_df)
 
 for review in clean_reviews:
-    clean_reviews[review].to_feather(review, compression='lz4')
+    clean_reviews[review].to_feather(
+        f'{BUCKET_S3}/{CLEAN_FOLDER}{review}',
+        compression='lz4')
 
 print('Reviews limpias')
 
