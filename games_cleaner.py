@@ -191,7 +191,7 @@ def get_mean(d_f, fixed_col, col, roundng):
     '''
     if roundng:
         return round(d_f.groupby(fixed_col, as_index=False)[col].mean(), 0)
-    return d_f.groupby(fixed_col, as_index=False)[col].mean()
+    return round(d_f.groupby(fixed_col, as_index=False)[col].mean(), 2)
 
 
 def obtain_mean_df(d_f, col, roundng):
@@ -203,7 +203,7 @@ def obtain_mean_df(d_f, col, roundng):
     if roundng:
         mean = int(d_f[col].mean())
     else:
-        mean = d_f[col].mean()
+        mean = round(d_f[col].mean(), 2)
 
     return genre_theme_df, genre_df, mean
 
