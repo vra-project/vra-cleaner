@@ -12,6 +12,7 @@ import boto3
 from botocore.exceptions import ClientError
 from games_cleaner import g_cleaner
 from review_cleaner import r_cleaner
+from games_treatment import g_treatment
 
 # %%
 # Se cargan las claves necesarias para utilizar a lo largo del proceso
@@ -23,6 +24,7 @@ config.read('secrets.toml', encoding='utf-8')
 BUCKET_S3 = config['AWS']['bucket_s3']
 ORIGINAL_NAME = 'dataset/games.feather'
 NEW_FILE_NAME = 'clean_dataset/games_clean.feather'
+COMPLEX_NAME = 'clean_dataset/games_complex.feather'
 FOLDER = 'reviews/'
 CLEAN_FOLDER = 'clean_reviews/'
 warnings.filterwarnings('ignore')
@@ -65,7 +67,8 @@ print('Reviews cargadas')
 # Se limpia el dataset
 first_clean_df = g_cleaner(games_df)
 clean_df, clean_reviews = r_cleaner(first_clean_df, reviews_df)
-
+complex_df = g_treatment(clean_df, games_df)
+    
 for review in clean_reviews:
     clean_reviews[review].to_feather(
         f'{BUCKET_S3}/{CLEAN_FOLDER}{review}',
@@ -75,6 +78,11 @@ print('Reviews limpias')
 
 clean_df.reset_index(drop=True).astype(str).to_feather(
     f'{BUCKET_S3}/{NEW_FILE_NAME}',
+    compression='lz4'
+)
+
+complex_df.reset_index(drop=True).astype(str).to_feather(
+    f'{BUCKET_S3}/{COMPLEX_NAME}',
     compression='lz4'
 )
 

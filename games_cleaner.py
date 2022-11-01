@@ -40,7 +40,7 @@ banned_keys = [
 
 def age_cols(row):
     '''
-    Tratamos la columna de age_ratings
+    Se trata la columna de age_ratings
     '''
     if row is None or pd.isnull(row):
         return np.NaN
@@ -55,7 +55,7 @@ def age_cols(row):
 
 def franchise_col(row):
     '''
-    Tratamos la columna de franquicias
+    Se trata la columna de franquicias
     '''
     if pd.isnull(row):
         return []
@@ -71,7 +71,7 @@ def franchise_col(row):
 
 def dev_col(row):
     '''
-    Tratamos la columna de desarrolladoras
+    Se trata la columna de desarrolladoras
     '''
     if pd.isnull(row):
         return []
@@ -87,7 +87,7 @@ def dev_col(row):
 
 def pub_col(row):
     '''
-    Tratamos la columna de publishers
+    Se trata la columna de publishers
     '''
     if pd.isnull(row):
         return []
@@ -98,7 +98,7 @@ def pub_col(row):
 
 def rawg_rat(row):
     '''
-    Tratamos la columna de RAWG_nrewiews
+    Se trata la columna de RAWG_nrewiews
     '''
     if pd.isnull(row):
         return 0
@@ -330,9 +330,9 @@ def g_cleaner(games_df):
         .replace(['nan', 'None', '[]', '{}'], np.NaN)
         .drop([
             'bundles', 'category', 'devs', 'expanded_games', 'expansions',
-            'game_engines', 'HLTB_link', 'HLTB_name', 'n_count', 'OC_link',
-            'OC_name', 'OC_nreviews', 'parent_game', 'porting', 'ports',
-            'RAWG_name', 'release_dates', 'remakes', 'remasters',
+            'game_engines', 'HLTB_link', 'HLTB_name', 'OC_link', 'OC_name',
+            'OC_nreviews', 'n_count', 'parent_game', 'porting', 'ports',
+            'RAWG_name', 'release_dates', 'remakes', 'remasters', 
             'standalone_expansions', 'status', 'storyline', 'supporting',
             'updated_at'
             ],
@@ -340,14 +340,22 @@ def g_cleaner(games_df):
             )
         )
 
+    # Se limpian aquellos con datos incorrectos de RAWG, pues no se lograria un
+    # correcto cruce con las reviews
+    games_df = (
+        games_df
+        .loc[games_df['RAWG_equal_name'] == 'True']
+        .drop('RAWG_equal_name', axis=1)
+        )
+
     games_df['id'] = games_df['id'].astype(int)
     games_df = (
         games_df
-        .groupby('id', as_index=False)
+        .groupby('RAWG_link', as_index=False)
         .agg({'platforms': lambda x: x.tolist()})
         .merge(
-            games_df.drop('platforms', axis=1).drop_duplicates('id'),
-            on='id'
+            games_df.drop('platforms', axis=1).drop_duplicates('RAWG_link'),
+            on='RAWG_link'
             )
         )
 
@@ -360,14 +368,6 @@ def g_cleaner(games_df):
     dates_col = [col for col in games_df if 'date' in col]
     for col in dates_col:
         games_df[col] = pd.to_datetime(games_df[col]).dt.year
-
-    # Se limpian aquellos con datos incorrectos de RAWG, pues no se lograria un
-    # correcto cruce con las reviews
-    games_df = (
-        games_df
-        .loc[games_df['RAWG_equal_name'] == 'True']
-        .drop('RAWG_equal_name', axis=1)
-        )
 
     # Se borran los valores nulos de las columnas que lo permiten dado su
     # infimo porcentaje y eliminamos la columna, pues no podra ser utilizada en
@@ -393,6 +393,7 @@ def g_cleaner(games_df):
         )
     games_df.drop('advanced_devs', axis=1, inplace=True)
     games_df = games_df.loc[games_df['RAWG_nreviews'] > 0]
+    games_df['series'] = games_df['franchises']
 
     # Se tratan los ratings llenando los datos nulos de OC con los de MC, e
     # iterando para el resto

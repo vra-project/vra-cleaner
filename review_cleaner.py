@@ -14,6 +14,19 @@ FOLDER = 'reviews/'
 N_REVIEWS = 50000
 
 # %%
+# Se crea una función para dar un nombre único a cada juego
+
+def get_id(name, year, platforms, n_count, n_count_2):
+    '''
+    Se crea un nombre único para los juegos con nombre repetido
+    '''
+    if n_count == 1:
+        return name
+    if n_count_2 > 1:
+        return f'{name} ({year}) - {(", ").join(platforms)}'
+    return f'{name} ({year})'
+
+# %%
 # Se define la funcion que se usara para limpiar reviews y juegos
 
 
@@ -64,6 +77,7 @@ def r_cleaner(games_df, reviews_df):
             right_on='RAWG_link'
             )
         .drop('RAWG_link', axis=1)
+        .drop_duplicates('id')
         .sort_values('id')
         .reset_index(drop=True)
         )
@@ -108,8 +122,46 @@ def r_cleaner(games_df, reviews_df):
         .reset_index(drop=True)
         )
 
+    # Se obtiene un nombre para los juegos con nombres repetidos
+    game_count = games_df.drop_duplicates('id')['name'].value_counts()
+    games_df = (
+        games_df
+        .assign(
+            n_count=games_df['name'].map(lambda name: game_count[name])
+            )
+    )
+    games_df = (
+        games_df
+        .merge(
+            games_df
+            .groupby(['name', 'first_release_date'])['id']
+            .count()
+            .reset_index()
+            .rename(columns={'id': 'n_count_2'}),
+            on=['name', 'first_release_date']
+            )
+        )
+    games_df['name'] = games_df.apply(
+        lambda game: get_id(
+            game['name'],
+            game['first_release_date'],
+            game['platforms'],
+            game['n_count'],
+            game['n_count_2']
+            ),
+        axis=1
+        )
+    games_df.drop(['id', 'n_count', 'n_count_2'], axis=1, inplace=True)
+    games_df = (
+        games_df
+        .rename(columns={'RAWG_link': 'game_id'})
+        .sort_values('name')
+        )
     cols = games_df.columns.tolist()
-    games_df = games_df[cols[:10] + cols[-2:] + cols[10:-2]]
+    games_df = games_df[
+        cols[3:0:-1] + [cols[0]] + [cols[9]] + cols[4:9] + cols[-2:] +
+        cols[10:-2]
+        ]
 
     # Se exportan las reviews
     print('Se obtienen las reviews limpias')
@@ -124,6 +176,8 @@ def r_cleaner(games_df, reviews_df):
             reviews_df.loc[
                 (reviews_df['id'] >= low_name) & (reviews_df['id'] <= top_name)
                 ]
+            .drop_duplicates('id')
+            .sort_values('id')
             .reset_index(drop=True)
             )
         clean_reviews[
