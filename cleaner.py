@@ -66,8 +66,8 @@ print('Reviews cargadas')
 # %%
 # Se limpia el dataset
 first_clean_df = g_cleaner(games_df)
-clean_df, clean_reviews = r_cleaner(first_clean_df, reviews_df)
-complex_df = g_treatment(clean_df, games_df)
+second_clean_df, clean_reviews = r_cleaner(first_clean_df, reviews_df)
+clean_df, complex_df = g_treatment(second_clean_df, games_df)
     
 for review in clean_reviews:
     clean_reviews[review].to_feather(
