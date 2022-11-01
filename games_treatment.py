@@ -8,6 +8,7 @@ limpio
 
 import ast
 import pandas as pd
+import numpy as np
 
 # %%
 # Se define la funcion que ayudara en la limpieza de los datos
@@ -58,7 +59,9 @@ def g_treatment(clean_df, games_df):
         .replace(['nan'], np.NaN)
         )
     fused_df.drop(
-        [col for col in fused if col.endswith('_')], axis=1, inplace=True
+        [col for col in fused_df.columns if col.endswith('_')],
+        axis=1,
+        inplace=True
         )
 
     for col in fused_df.columns[16:]:
