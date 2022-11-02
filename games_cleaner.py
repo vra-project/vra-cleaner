@@ -354,7 +354,7 @@ def g_cleaner(games_df):
         .groupby('RAWG_link', as_index=False)
         .agg({'platforms': lambda x: x.tolist()})
         .merge(
-            games_df.drop('platforms', axis=1).drop_duplicates('RAWG_link'),
+            games_df.drop('platforms', axis=1).drop_duplicates('id'),
             on='RAWG_link'
             )
         )
@@ -467,8 +467,8 @@ def g_cleaner(games_df):
         ]
     for col, topx, min_games in zip(
             col_top,
-            [50, 50, 200, 100, 100, 15],
-            [5, 5, 10, 5, 2, 10]):
+            [175, 100, 200, 100, 200, 15],
+            [5, 10, 10, 5, 2, 10]):
         games_df = (
             games_df
             .drop(col, axis=1)

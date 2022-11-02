@@ -118,7 +118,6 @@ def r_cleaner(games_df, reviews_df):
             games_reviews_df, left_on='RAWG_link', right_on='game_id'
             )
         .drop('game_id', axis=1)
-        .drop_duplicates(subset='RAWG_link')
         .reset_index(drop=True)
         )
 

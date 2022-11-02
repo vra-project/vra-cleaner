@@ -51,8 +51,8 @@ def g_treatment(clean_df, games_df):
         clean_df[['name'] + clean_df.columns.tolist()[2:10]]
         .merge(
             games_df.loc[games_df['RAWG_equal_name'] == 'True'][
-                cols[1:3] + cols[3:5] + cols[7:11] + cols[26:30] + [cols[43]]
-                + [cols[49]]
+                cols[2:5] + cols[7:10] + [cols[11]] + cols[26:30]
+                + [cols[43]]+ [cols[49]]
                 ],
             left_on='game_id',
             right_on='RAWG_link',
@@ -71,18 +71,18 @@ def g_treatment(clean_df, games_df):
         inplace=True
         )
 
-    fused_df[fused_df.columns.tolist()[10:13] + ['themes']] = (
-        fused_df[fused_df.columns.tolist()[10:13] + ['themes']].fillna('[]')
+    fused_df[fused_df.columns.tolist()[9:12] + ['themes']] = (
+        fused_df[fused_df.columns.tolist()[9:12] + ['themes']].fillna('[]')
         )
-    for col in fused_df.columns[16:]:
+    for col in fused_df.columns[15:]:
         fused_df[col] = fused_df[col].fillna('[]').map(ast.literal_eval)
 
-    for col in fused_df.columns[16:-1]:
+    for col in fused_df.columns[15:-1]:
         fused_df[col] = fused_df[col].map(get_from_dict)
     fused_df['devs'] = fused_df['advanced_devs'].map(get_dev_function)
     fused_df.drop('advanced_devs', axis=1, inplace=True)
     cols = fused_df.columns.tolist()
-    fused_df = fused_df[['name', 'first_release_date'] + cols[1:9] + cols[10:]]
+    fused_df = fused_df[['name', 'first_release_date'] + cols[1:8] + cols[9:]]
 
     clean_df.drop(['platforms', 'series', 'age_ratings'], axis=1, inplace=True)
 
