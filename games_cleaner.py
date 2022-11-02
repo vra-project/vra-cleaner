@@ -351,11 +351,11 @@ def g_cleaner(games_df):
     games_df['id'] = games_df['id'].astype(int)
     games_df = (
         games_df
-        .groupby('RAWG_link', as_index=False)
+        .groupby('id', as_index=False)
         .agg({'platforms': lambda x: x.tolist()})
         .merge(
             games_df.drop('platforms', axis=1).drop_duplicates('id'),
-            on='RAWG_link'
+            on='id'
             )
         )
 

@@ -110,17 +110,6 @@ def r_cleaner(games_df, reviews_df):
         .drop_duplicates('game_id')
         )
 
-    # Se obtienen los nuevos datos de RAWG_rating y RAWG_nreviews
-    print('Se obtiene el dataset limpio')
-    games_df = (
-        games_df.drop(['RAWG_rating', 'RAWG_nreviews'], axis=1)
-        .merge(
-            games_reviews_df, left_on='RAWG_link', right_on='game_id'
-            )
-        .drop('game_id', axis=1)
-        .reset_index(drop=True)
-        )
-
     # Se obtiene un nombre para los juegos con nombres repetidos
     game_count = games_df.drop_duplicates('id')['name'].value_counts()
     games_df = (
@@ -151,6 +140,18 @@ def r_cleaner(games_df, reviews_df):
         axis=1
         )
     games_df.drop(['id', 'n_count', 'n_count_2'], axis=1, inplace=True)
+
+    # Se obtienen los nuevos datos de RAWG_rating y RAWG_nreviews
+    print('Se obtiene el dataset limpio')
+    games_df = (
+        games_df.drop(['RAWG_rating', 'RAWG_nreviews'], axis=1)
+        .merge(
+            games_reviews_df, left_on='RAWG_link', right_on='game_id'
+            )
+        .drop('game_id', axis=1)
+        .reset_index(drop=True)
+        )
+
     games_df = (
         games_df
         .rename(columns={'RAWG_link': 'game_id'})

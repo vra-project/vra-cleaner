@@ -48,7 +48,10 @@ def g_treatment(clean_df, games_df):
     '''
     cols = games_df.columns.tolist()
     fused_df = (
-        clean_df[['name'] + clean_df.columns.tolist()[2:10]]
+        clean_df[
+            ['name', 'platforms', 'series', 'age_ratings'] +
+            clean_df.columns.tolist()[5:10]
+            ]
         .merge(
             games_df.loc[games_df['RAWG_equal_name'] == 'True'][
                 cols[2:5] + cols[7:10] + [cols[11]] + cols[26:30]
