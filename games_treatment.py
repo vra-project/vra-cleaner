@@ -46,23 +46,23 @@ def g_treatment(clean_df, games_df):
     '''
     Transforma la inforamcion a un formato mas comodo para leer
     '''
+    games_df['id'] = games_df['id'].astype(int)
     cols = games_df.columns.tolist()
     fused_df = (
         clean_df[
-            ['name', 'platforms', 'series', 'age_ratings'] +
+            ['id', 'name', 'platforms', 'series'] +
             clean_df.columns.tolist()[5:10]
             ]
         .merge(
             games_df.loc[games_df['RAWG_equal_name'] == 'True'][
-                cols[2:5] + cols[7:10] + [cols[11]] + cols[26:30]
-                + [cols[43]]+ [cols[49]]
+                [cols[0]] + cols[2:5] + cols[7:10] + [cols[11]] + cols[26:30:2]
+                + [cols[49]]
                 ],
-            left_on='game_id',
-            right_on='RAWG_link',
+            on='id',
             suffixes=('', '_')
             )
+        .drop('id', axis=1)
         .drop_duplicates('name')
-        .drop(['RAWG_link', 'game_id'], axis=1)
         .replace(['nan'], np.NaN)
         )
     fused_df['first_release_date'] = (
@@ -85,9 +85,23 @@ def g_treatment(clean_df, games_df):
     fused_df['devs'] = fused_df['advanced_devs'].map(get_dev_function)
     fused_df.drop('advanced_devs', axis=1, inplace=True)
     cols = fused_df.columns.tolist()
-    fused_df = fused_df[['name', 'first_release_date'] + cols[1:8] + cols[9:]]
+    fused_df = (
+        fused_df[
+            ['name', 'first_release_date'] + cols[1:8] + cols[9:11] +
+            [cols[13]] + cols[11:13] + cols[14:]
+            ]
+        .assign(
+            name_lower=lambda df: df['name'].str.lower()
+            )
+        .sort_values('name_lower')
+        .drop('name_lower', axis=1)
+        )
 
-    clean_df.drop(['platforms', 'series', 'age_ratings'], axis=1, inplace=True)
+    clean_df.drop(
+        ['id', 'platforms', 'series', 'age_ratings'],
+        axis=1,
+        inplace=True
+        )
 
     print('Dataset detallado creado')
     return clean_df, fused_df

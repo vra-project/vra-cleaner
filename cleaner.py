@@ -58,9 +58,8 @@ for file in av_files:
     reviews_list.append(
         pd.read_feather(f'{BUCKET_S3}/{file}').drop('review_text', axis=1)
         )
-    print(file)
 
-reviews_df = pd.concat(reviews_list)
+reviews_df = pd.concat(reviews_list).drop_duplicates('id')
 print('Reviews cargadas')
 
 # %%
@@ -68,7 +67,7 @@ print('Reviews cargadas')
 first_clean_df = g_cleaner(games_df)
 second_clean_df, clean_reviews = r_cleaner(first_clean_df, reviews_df)
 clean_df, complex_df = g_treatment(second_clean_df, games_df)
-    
+
 for review in clean_reviews:
     clean_reviews[review].to_feather(
         f'{BUCKET_S3}/{CLEAN_FOLDER}{review}',

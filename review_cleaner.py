@@ -60,8 +60,25 @@ def r_cleaner(games_df, reviews_df):
         .loc[lambda df: df['count'] > 4]
         )
 
-    for num in [str(n) for n in range(1, 6) if n != 2]:
-        users_df = users_df.loc[users_df[num] > 0]
+    users_df_per = (
+        pd.concat([
+            users_df[['user_id', 'count']],
+            users_df[['1', '3', '4', '5']].div(users_df['count'], axis=0)
+            ],
+            axis=1
+            )
+        )
+
+    users_df = (
+        users_df_per
+        .loc[(users_df['4'] > 0) & (users_df['5'] > 0)]
+        .loc[lambda df:
+             (df['1'] <= df['1'].quantile(0.99)) &
+             (df['3'] <= df['3'].quantile(0.99)) &
+             (df['3'] <= df['4'].quantile(0.99)) &
+             (df['5'] <= df['5'].quantile(0.99))
+             ]
+            )
 
     # Se limpian las reviews permaneciendo las de usuarios validos
     reviews_df = reviews_df.merge(users_df[['user_id']], on='user_id')
@@ -92,22 +109,19 @@ def r_cleaner(games_df, reviews_df):
             'RAWG_rating': 'mean',
             'RAWG_nreviews': 'count'
             })
-        .loc[lambda df: df['RAWG_nreviews'] > 5]
+        # .loc[lambda df: df['RAWG_nreviews'] > 5]
         .assign(RAWG_rating=lambda df: df['RAWG_rating'].round(2))
         )
 
     # Se limpia el dataset usando los juegos con varias reviews
     reviews_df = (
         reviews_df
-        .merge(games_reviews_df[['game_id']], on='game_id')
+        .merge(
+            games_reviews_df[['game_id']]
+            .loc[games_reviews_df['RAWG_nreviews'] > 5],
+            on='game_id'
+            )
         .sort_values('id')
-        )
-
-    # Para limpiar games_df, se usan los valores limpios de games_reviews_df
-    games_reviews_df = (
-        games_reviews_df
-        .merge(reviews_df[['game_id']], on='game_id')
-        .drop_duplicates('game_id')
         )
 
     # Se obtiene un nombre para los juegos con nombres repetidos
@@ -139,7 +153,7 @@ def r_cleaner(games_df, reviews_df):
             ),
         axis=1
         )
-    games_df.drop(['id', 'n_count', 'n_count_2'], axis=1, inplace=True)
+    games_df.drop(['n_count', 'n_count_2'], axis=1, inplace=True)
 
     # Se obtienen los nuevos datos de RAWG_rating y RAWG_nreviews
     print('Se obtiene el dataset limpio')
@@ -159,7 +173,7 @@ def r_cleaner(games_df, reviews_df):
         )
     cols = games_df.columns.tolist()
     games_df = games_df[
-        cols[3:0:-1] + [cols[0]] + [cols[9]] + cols[4:9] + cols[-2:] +
+        cols[3::-1] + [cols[9]] + cols[4:9] + cols[-2:] +
         cols[10:-2]
         ]
 

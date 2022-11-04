@@ -258,14 +258,14 @@ def keyword_explosion(d_f, fixed_col):
         )
 
 
-def get_new_keywords(keywords, genres, themes, keys, n=6):
+def get_new_keywords(keywords, genres, themes, keys, n_key=6):
     '''
     Se define el numero de keywords que tendra cada juego, y se rellena en
     funcion de las mas usadas por genero y tematica. Se excluiran aquellas que
     esten en la lista de baneadas
     '''
     keywords = [keyword for keyword in keywords if keyword not in banned_keys]
-    while len(keywords) < n:
+    while len(keywords) < n_key:
         to_add = (
             keys[0].loc[
                 (keys[0]['genres'] == genres) &
@@ -274,7 +274,7 @@ def get_new_keywords(keywords, genres, themes, keys, n=6):
             ]
             .tolist()
         )
-        for i in range(n):
+        for i in range(n_key):
             try:
                 if to_add[i] not in keywords:
                     keywords.append(to_add[i])
@@ -283,17 +283,17 @@ def get_new_keywords(keywords, genres, themes, keys, n=6):
         to_add = (
             keys[1].loc[keys[1]['genres'] == genres, 'keywords'].tolist()
         )
-        for i in range(n):
+        for i in range(n_key):
             try:
                 if to_add[i] not in keywords:
                     keywords.append(to_add[i])
             except IndexError:
                 break
         to_add = keys[2]['keywords'].tolist()
-        for i in range(6):
+        for i in range(n_key):
             if to_add[i] not in keywords:
                 keywords.append(to_add[i])
-    return keywords[:n]
+    return keywords[:n_key]
 
 
 def get_top(d_f, col, topx, min_games):
@@ -332,7 +332,7 @@ def g_cleaner(games_df):
             'bundles', 'category', 'devs', 'expanded_games', 'expansions',
             'game_engines', 'HLTB_link', 'HLTB_name', 'OC_link', 'OC_name',
             'OC_nreviews', 'n_count', 'parent_game', 'porting', 'ports',
-            'RAWG_name', 'release_dates', 'remakes', 'remasters', 
+            'RAWG_name', 'release_dates', 'remakes', 'remasters',
             'standalone_expansions', 'status', 'storyline', 'supporting',
             'updated_at'
             ],
