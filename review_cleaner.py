@@ -42,8 +42,9 @@ def r_cleaner(games_df, reviews_df):
     # Se agrupan los usuarios segun la media de sus valoraciones, las reviews
     # totales y el numero de reviews con cada nota distinta
     # Permaneceran los usuarios con 5 o mas reviews y que tengan, como minimo,
-    # una valoracion con cada valor (1, 3, 4, 5) para evitar usuarios con solo
-    # reviews positivas o negativas
+    # una valoracion con valor 4 y 5, ademas de despreciar aquellos usuarios
+    # que esten por encima del percentil 99 en uno de los cuatro valores
+    # posibles
 
     print('Se obtienen los usuarios validos')
     users_df = (
@@ -124,7 +125,7 @@ def r_cleaner(games_df, reviews_df):
         .sort_values('id')
         )
 
-    # Se obtiene un nombre para los juegos con nombres repetidos
+    # Se obtiene un nombre unico para los juegos con nombres repetidos
     game_count = games_df.drop_duplicates('id')['name'].value_counts()
     games_df = (
         games_df
